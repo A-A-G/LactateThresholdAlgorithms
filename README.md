@@ -1,7 +1,7 @@
 # LactateThresholdAlgorithms
-##Comparison of different algorithms/methods for lactate threshold detection.
+## Comparison of different algorithms/methods for lactate threshold detection.
 
-###Methods:
+### Methods:
 * Baldari: second increase of at least 0.5 mmol/l
 * Bishop: modified D-Max method
 * Cheng: D-Max method
@@ -10,7 +10,7 @@
 * Heck: 4 mmol/l-threshold
 * Morton: 3-segment parabolic regression
 
-###Example:
+### Example:
 
 |         | Heck | Baldari | Dickhuth | SegLin | SegPara | Dmax | Dmod | mean | std |
 |---------|------|---------|----------|--------|---------|------|------|------|-----|
@@ -23,10 +23,10 @@
 
 ![Example](https://raw.githubusercontent.com/A-A-G/LactateThresholdAlgorithms/master/lactate/LactateThreshold2_01.png)
 
-###Requiered:
+### Requiered:
 * MATLAB > 2016b (functions in script)
 * Optimization Toolbox (fmincon)
 * Bioinformatics Toolbox (suptitle, not necessary)
 
-###Citation:
+### Citation:
 Send an [email](mailto:alexander@artigagonzalez.de) for more details.
