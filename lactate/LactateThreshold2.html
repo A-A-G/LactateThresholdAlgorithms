@@ -1,0 +1,597 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>LactateThreshold2</title><meta name="generator" content="MATLAB 9.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-03-15"><meta name="DC.source" content="LactateThreshold2.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">files</a></li><li><a href="#3">import</a></li><li><a href="#4">data</a></li><li><a href="#5">estimate thresholds</a></li><li><a href="#6">results</a></li><li><a href="#7">algorithms</a></li></ul></div><pre class="codeinput">clearvars;
+close <span class="string">all</span>;
+</pre><h2 id="2">files</h2><pre class="codeinput">datafile = <span class="string">'Stufentest_laktat_leistung.csv'</span>;
+</pre><h2 id="3">import</h2><pre class="codeinput">data = importLactate(datafile);
+</pre><h2 id="4">data</h2><pre class="codeinput">subs = {<span class="string">'PB03'</span> ; <span class="string">'PB05'</span> ; <span class="string">'PB06'</span> ; <span class="string">'PB08'</span> ; <span class="string">'PB09'</span>};
+steps = data(1,:)';
+PB03 = data(3,:)'; PB03 = PB03(~isnan(PB03));
+PB05 = data(5,:)'; PB05 = PB05(~isnan(PB05));
+PB06 = data(6,:)'; PB06 = PB06(~isnan(PB06));
+PB08 = data(8,:)'; PB08 = PB08(~isnan(PB08));
+PB09 = data(9,:)'; PB09 = PB09(~isnan(PB09));
+subj_data = {PB03 , PB05 , PB06 , PB08 , PB09}';
+Used_LT = [380 ; 240 ; 260 ; 200 ; 220];
+</pre><h2 id="5">estimate thresholds</h2><pre class="codeinput">LT1 = zeros(size(subj_data));
+Mader = zeros(size(subj_data));
+SegLin = zeros(size(subj_data));
+SegPara = zeros(size(subj_data));
+Guidetti = zeros(size(subj_data));
+Dickhuth = zeros(size(subj_data));
+Dmax = zeros(size(subj_data));
+Dmod = zeros(size(subj_data));
+<span class="keyword">for</span> i = 1:length(subj_data)
+    f = figure(<span class="string">'Name'</span>,subs{i});
+    set(f, <span class="string">'Units'</span>, <span class="string">'normalized'</span>, <span class="string">'Position'</span>, [0.1, 0.1, 0.4, 0.8]);
+    LT1(i) = lacT1(steps, subj_data{i});
+    Mader(i) = maderLT(steps, subj_data{i});
+    Guidetti(i) = iat(steps, subj_data{i});
+    Dickhuth(i) = dick(steps, subj_data{i});
+    SegLin(i) = twoLTlin(steps, subj_data{i});
+    SegPara(i) = twoLTpara(steps, subj_data{i});
+    Dmax(i) = dmax(steps, subj_data{i});
+    Dmod(i) = dmod(steps, subj_data{i});
+    suptitle(subs{i});
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="LactateThreshold2_01.png" alt=""> <img vspace="5" hspace="5" src="LactateThreshold2_02.png" alt=""> <img vspace="5" hspace="5" src="LactateThreshold2_03.png" alt=""> <img vspace="5" hspace="5" src="LactateThreshold2_04.png" alt=""> <img vspace="5" hspace="5" src="LactateThreshold2_05.png" alt=""> <h2 id="6">results</h2><pre class="codeinput">mean = mean([Mader,Guidetti,Dickhuth,SegLin,SegPara,Dmax,Dmod],2);
+std = std([Mader,Guidetti,Dickhuth,SegLin,SegPara,Dmax,Dmod],0,2);
+Mader = round(Mader);
+Guidetti = round(Guidetti);
+Dickhuth = round(Dickhuth);
+SegLin = round(SegLin);
+SegPara = round(SegPara);
+Dmax = round(Dmax);
+Dmod = round(Dmod);
+mean_minus_std = round(mean - std);
+mean_plus_std = round(mean + std);
+mean = round(mean);
+std = round(std);
+fits = cell(size(subj_data));
+<span class="keyword">for</span> i = 1:length(subj_data)
+   <span class="keyword">if</span>  (mean_minus_std(i) &lt;= Used_LT(i)) &amp;&amp; (mean_plus_std(i) &gt;= Used_LT(i))
+       fits{i} = <span class="string">'x'</span>;
+   <span class="keyword">else</span>
+       fits{i} = <span class="string">''</span>;
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+T = table(Used_LT,Mader,Guidetti,Dickhuth,SegLin,SegPara,Dmax,Dmod,mean,std,mean_minus_std,mean_plus_std,fits,<span class="string">'RowNames'</span>,subs);
+disp(T);
+</pre><pre class="codeoutput">            Used_LT    Mader    Guidetti    Dickhuth    SegLin    SegPara    Dmax    Dmod    mean    std    mean_minus_std    mean_plus_std    fits
+            _______    _____    ________    ________    ______    _______    ____    ____    ____    ___    ______________    _____________    ____
+
+    PB03    380        388      360         380         357       368        311     382     364     26     338               390              'x' 
+    PB05    240        283      260         272         253       236        225     276     258     21     236               279              'x' 
+    PB06    260        267      220         251         258       259        225     262     249     19     230               268              'x' 
+    PB08    200        215      180         203         219       214        194     224     207     16     191               222              'x' 
+    PB09    220        220      200         212         218       223        195     226     213     12     202               225              'x' 
+
+</pre><h2 id="7">algorithms</h2><pre class="codeinput"><span class="keyword">function</span> pLT = maderLT(power, lactate)
+pLT = NaN;
+<span class="keyword">for</span> i = 2:length(lactate)
+    <span class="keyword">if</span> ((lactate(i)&gt;=4) &amp;&amp; (lactate(i-1)&lt;=4))
+        pLT = interp1(lactate(i-1:i), power(i-1:i), 4);
+        <span class="keyword">break</span>;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> pLT = iat(power, lactate)
+pLT = NaN;
+<span class="keyword">for</span> i = 2:length(lactate)-1
+    ld = lactate(i) - lactate(i-1);
+    <span class="keyword">if</span> ld &gt;= 0.5
+        <span class="keyword">if</span> (lactate(i+1) - lactate(i)) &gt;= ld
+            pLT = power(i);
+            <span class="keyword">break</span>;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> pLT = dick(power, lactate)
+    [~, start] = lacT1(power, lactate);
+    pLT = interp1(lactate(start:end), power(start:length(lactate)), lactate(start)+1.5);
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> pLT = dmod(power, lactate)
+    [~, start] = lacT1(power, lactate);
+    pLT = dmaxmod(power, lactate, start);
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> [pLT, index] = lacT1(power, lactate)
+    <span class="keyword">for</span> i = 2:length(lactate)
+        <span class="keyword">if</span> lactate(i)-lactate(i-1) &gt;= 0.4
+                pLT = power(i-1);
+                index = i-1;
+            <span class="keyword">break</span>;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> pLT = dmax(power, lactate)
+index = 1;
+pLT = power(index);
+d = 0;
+Q1 = [power(1) ; lactate(1)];
+Q2 = [power(length(lactate)) ; lactate(end)];
+[poly, ~, mu] = polyfit(power(1:length(lactate)), lactate, 3);
+<span class="keyword">for</span> i = power(1):power(length(lactate))
+    dLP = distLP(Q1, Q2, [i ; polyval(poly, i, [], mu)]);
+    <span class="keyword">if</span> dLP &gt; d
+        d = dLP;
+        pLT = i;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="comment">%plotting</span>
+ax = subplot(4,1,3);
+title(<span class="string">'Dmax'</span>);
+hold <span class="string">on</span>;
+plot([power(1) power(length(lactate))], [lactate(1) ; lactate(end)]);
+plot(power(1:length(lactate)), lactate, <span class="string">'o'</span>);
+plot(power(1):power(length(lactate)), polyval(poly, power(1):power(length(lactate)), [], mu), <span class="string">'--'</span>);
+P = [pLT ; polyval(poly, pLT, [], mu)];
+xl = [power(1)-10 power(length(lactate))+10];
+yl = [min(lactate)-1 max(lactate)*1.1];
+xlim(xl);  ylim(yl);
+r = get(ax, <span class="string">'DataAspectRatio'</span>);
+u = Q2 - Q1; n = [u(2) / r(2) ; -u(1) / r(1)];
+LP = P - distLP(Q1, Q2, P)*n/norm(n);
+plot([P(1) ; LP(1)], [P(2) ; LP(2)],<span class="string">'Color'</span>,<span class="string">'black'</span>);
+xticks(power(1:length(lactate)));
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> pLT = dmaxmod(power, lactate, start)
+index = 1;
+pLT = power(index);
+d = 0;
+Q1 = [power(start) ; lactate(start)];
+Q2 = [power(length(lactate)) ; lactate(end)];
+[poly, ~, mu] = polyfit(power(start:length(lactate)), lactate(start:end), 3);
+<span class="keyword">for</span> i = power(start):power(length(lactate))
+    dLP = distLP(Q1, Q2, [i ; polyval(poly, i, [], mu)]);
+    <span class="keyword">if</span> dLP &gt; d
+        d = dLP;
+        pLT = i;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="comment">%plotting</span>
+ax = subplot(4,1,4);
+title(<span class="string">'Dmod'</span>);
+hold <span class="string">on</span>;
+plot([power(start) power(length(lactate))], [lactate(start) ; lactate(end)]);
+plot(power(1:length(lactate)), lactate, <span class="string">'o'</span>);
+plot(power(start):power(length(lactate)), polyval(poly, power(start):power(length(lactate)), [], mu), <span class="string">'--'</span>);
+P = [pLT ; polyval(poly, pLT, [], mu)];
+xl = [power(1)-10 power(length(lactate))+10];
+yl = [min(lactate)-1 max(lactate)*1.1];
+xlim(xl);  ylim(yl);
+r = get(ax, <span class="string">'DataAspectRatio'</span>);
+u = Q2 - Q1; n = [u(2) / r(2) ; -u(1) / r(1)];
+LP = P - distLP(Q1, Q2, P)*n/norm(n);
+plot([P(1) ; LP(1)], [P(2) ; LP(2)],<span class="string">'Color'</span>,<span class="string">'black'</span>);
+xticks(power(1:length(lactate)));
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> d = distLP(Q1, Q2, P)
+d = abs(det([Q2-Q1,P-Q1]))/norm(Q2-Q1);
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> pLT = twoLTlin(power, lactate)
+x0 = [lactate(1) ; 0 ; 0 ; 0 ; power(2) ; power(3)];
+lb = [lactate(1)-1 ; -1 ; -1 ; -1 ; power(2) ; power(3)];
+ub = [2*lactate(1) ; 1 ; 5 ; 10 ; power(length(lactate)-2) ; power(length(lactate)-1)];
+A = zeros(length(lb));
+A(1,5) = 1;
+A(1,6) = -1;
+b = zeros(size(lb));
+b(1) = power(1)-power(2);
+fun = @(x) mean((funcValues(@linLa, power(1:length(lactate)), x) - lactate).^2);
+options = optimset(<span class="string">'Display'</span>, <span class="string">'off'</span>) ;
+x = fmincon(fun, x0, A, b, [], [], lb, ub, [], options);
+pLT = x(6);
+<span class="comment">%plotting</span>
+ax = subplot(4,1,1);
+title(<span class="string">'SegmentalLinear'</span>);
+hold <span class="string">on</span>;
+p = power(1:length(lactate));
+p = [p(p&lt;x(5)) ; x(5) ; p(p&gt;x(5)&amp;p&lt;x(6)) ; x(6) ; p(p&gt;x(6))];
+plot(p, funcValues(@linLa, p, x));
+plot(power(1:length(lactate)), lactate, <span class="string">'o'</span>);
+xl = [power(1)-10 power(length(lactate))+10];
+yl = [min(lactate)-1 max(lactate)*1.1];
+xlim(xl);  ylim(yl);
+plot([x(5) x(5)], get(ax,<span class="string">'YLim'</span>),<span class="string">'Color'</span>,<span class="string">'black'</span>);
+plot([x(6) x(6)], get(ax,<span class="string">'YLim'</span>),<span class="string">'Color'</span>,<span class="string">'black'</span>);
+xticks(power(1:length(lactate)));
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> pLT = twoLTpara(power, lactate)
+x0 = [lactate(1) ; 1 ; 1 ; power(2) ; power(3)];
+lb = [lactate(1)-1 ; 10^-4 ; 10^-4 ; power(2) ; power(3)];
+ub = [2*lactate(1) ; 0.01 ; 0.01 ; power(length(lactate)-2) ; power(length(lactate)-1)];
+A = zeros(length(lb));
+A(1,4) = 1;
+A(1,5) = -1;
+b = zeros(size(lb));
+b(1) = power(1)-power(2);
+fun = @(x) mean((funcValues(@paraLa, power(1:length(lactate)), x) - lactate).^2);
+options = optimset(<span class="string">'Display'</span>, <span class="string">'off'</span>) ;
+x = fmincon(fun, x0, A, b, [], [], lb, ub, [], options);
+pLT = x(5);
+<span class="comment">%plotting</span>
+ax = subplot(4,1,2);
+title(<span class="string">'SegmentalParabolic'</span>);
+hold <span class="string">on</span>;
+plot(power(1:length(lactate)), funcValues(@paraLa, power(1:length(lactate)), x));
+plot(power(1:length(lactate)), lactate, <span class="string">'o'</span>);
+xl = [power(1)-10 power(length(lactate))+10];
+yl = [min(lactate)-1 max(lactate)*1.1];
+xlim(xl);  ylim(yl);
+plot([x(4) x(4)], get(ax,<span class="string">'YLim'</span>),<span class="string">'Color'</span>,<span class="string">'black'</span>);
+plot([x(5) x(5)], get(ax,<span class="string">'YLim'</span>),<span class="string">'Color'</span>,<span class="string">'black'</span>);
+xticks(power(1:length(lactate)));
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> values = funcValues(fun, power, x)
+values = zeros(size(power));
+<span class="keyword">for</span> i = 1:length(power)
+    values(i) = fun(power(i), x);
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> la = linLa(power, x)
+p = x(1); a1 = x(2); a2 = x(3); a3 = x(4) ; d1 = x(5); d2 = x(6); <span class="comment">%#ok&lt;NASGU&gt;</span>
+<span class="keyword">if</span> power &lt;= d1
+    la = p + a1*power;
+<span class="keyword">elseif</span> power &lt;= d2
+    la = p + a1*d1 + a2*(power-d1);
+<span class="keyword">else</span>
+    la = p + a1*d1 + a2*(d2-d1) + a3*(power-d2);
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> la = paraLa(power, x)
+p = x(1); a1 = x(2); a2 = x(3); d1 = x(4); d2 = x(5); <span class="comment">%#ok&lt;NASGU&gt;</span>
+<span class="keyword">if</span> power &lt;= d1
+    la = p;
+<span class="keyword">elseif</span> power &lt;= d2
+    la = p + a1*(power-d1)^2;
+<span class="keyword">else</span>
+    la = p + a1*(power-d1)^2 + 2*a1*(d2-d1)*(power-d2) + a2*(power-d2)^2;
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2016b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+clearvars;
+close all;
+
+%% files
+datafile = 'Stufentest_laktat_leistung.csv';
+
+%% import
+data = importLactate(datafile);
+
+%% data
+subs = {'PB03' ; 'PB05' ; 'PB06' ; 'PB08' ; 'PB09'};
+steps = data(1,:)';
+PB03 = data(3,:)'; PB03 = PB03(~isnan(PB03));
+PB05 = data(5,:)'; PB05 = PB05(~isnan(PB05));
+PB06 = data(6,:)'; PB06 = PB06(~isnan(PB06));
+PB08 = data(8,:)'; PB08 = PB08(~isnan(PB08));
+PB09 = data(9,:)'; PB09 = PB09(~isnan(PB09));
+subj_data = {PB03 , PB05 , PB06 , PB08 , PB09}';
+Used_LT = [380 ; 240 ; 260 ; 200 ; 220];
+
+%% estimate thresholds
+LT1 = zeros(size(subj_data));
+Mader = zeros(size(subj_data));
+SegLin = zeros(size(subj_data));
+SegPara = zeros(size(subj_data));
+Guidetti = zeros(size(subj_data));
+Dickhuth = zeros(size(subj_data));
+Dmax = zeros(size(subj_data));
+Dmod = zeros(size(subj_data));
+for i = 1:length(subj_data)
+    f = figure('Name',subs{i});
+    set(f, 'Units', 'normalized', 'Position', [0.1, 0.1, 0.4, 0.8]);
+    LT1(i) = lacT1(steps, subj_data{i});
+    Mader(i) = maderLT(steps, subj_data{i});
+    Guidetti(i) = iat(steps, subj_data{i});
+    Dickhuth(i) = dick(steps, subj_data{i});
+    SegLin(i) = twoLTlin(steps, subj_data{i});
+    SegPara(i) = twoLTpara(steps, subj_data{i});
+    Dmax(i) = dmax(steps, subj_data{i});
+    Dmod(i) = dmod(steps, subj_data{i});
+    suptitle(subs{i});
+end
+
+%% results
+mean = mean([Mader,Guidetti,Dickhuth,SegLin,SegPara,Dmax,Dmod],2);
+std = std([Mader,Guidetti,Dickhuth,SegLin,SegPara,Dmax,Dmod],0,2);
+Mader = round(Mader);
+Guidetti = round(Guidetti);
+Dickhuth = round(Dickhuth);
+SegLin = round(SegLin);
+SegPara = round(SegPara);
+Dmax = round(Dmax);
+Dmod = round(Dmod);
+mean_minus_std = round(mean - std);
+mean_plus_std = round(mean + std);
+mean = round(mean);
+std = round(std);
+fits = cell(size(subj_data));
+for i = 1:length(subj_data)
+   if  (mean_minus_std(i) <= Used_LT(i)) && (mean_plus_std(i) >= Used_LT(i))
+       fits{i} = 'x';
+   else
+       fits{i} = '';
+   end       
+end
+T = table(Used_LT,Mader,Guidetti,Dickhuth,SegLin,SegPara,Dmax,Dmod,mean,std,mean_minus_std,mean_plus_std,fits,'RowNames',subs);
+disp(T);
+
+%% algorithms
+function pLT = maderLT(power, lactate)
+pLT = NaN;
+for i = 2:length(lactate)
+    if ((lactate(i)>=4) && (lactate(i-1)<=4))
+        pLT = interp1(lactate(i-1:i), power(i-1:i), 4);
+        break;
+    end
+end
+end
+
+function pLT = iat(power, lactate)
+pLT = NaN;
+for i = 2:length(lactate)-1
+    ld = lactate(i) - lactate(i-1);
+    if ld >= 0.5
+        if (lactate(i+1) - lactate(i)) >= ld
+            pLT = power(i);
+            break;
+        end
+    end
+end
+end
+
+function pLT = dick(power, lactate)
+    [~, start] = lacT1(power, lactate);
+    pLT = interp1(lactate(start:end), power(start:length(lactate)), lactate(start)+1.5);
+end
+
+function pLT = dmod(power, lactate)
+    [~, start] = lacT1(power, lactate);
+    pLT = dmaxmod(power, lactate, start);
+end
+
+function [pLT, index] = lacT1(power, lactate)
+    for i = 2:length(lactate)
+        if lactate(i)-lactate(i-1) >= 0.4
+                pLT = power(i-1);
+                index = i-1;
+            break;
+        end
+    end
+end
+
+function pLT = dmax(power, lactate)
+index = 1;
+pLT = power(index);
+d = 0;
+Q1 = [power(1) ; lactate(1)];
+Q2 = [power(length(lactate)) ; lactate(end)];
+[poly, ~, mu] = polyfit(power(1:length(lactate)), lactate, 3);
+for i = power(1):power(length(lactate))
+    dLP = distLP(Q1, Q2, [i ; polyval(poly, i, [], mu)]);
+    if dLP > d
+        d = dLP;
+        pLT = i;
+    end
+end
+%plotting
+ax = subplot(4,1,3);
+title('Dmax');
+hold on;
+plot([power(1) power(length(lactate))], [lactate(1) ; lactate(end)]);
+plot(power(1:length(lactate)), lactate, 'o');
+plot(power(1):power(length(lactate)), polyval(poly, power(1):power(length(lactate)), [], mu), 'REPLACE_WITH_DASH_DASH');
+P = [pLT ; polyval(poly, pLT, [], mu)];
+xl = [power(1)-10 power(length(lactate))+10];
+yl = [min(lactate)-1 max(lactate)*1.1];
+xlim(xl);  ylim(yl);
+r = get(ax, 'DataAspectRatio');
+u = Q2 - Q1; n = [u(2) / r(2) ; -u(1) / r(1)];
+LP = P - distLP(Q1, Q2, P)*n/norm(n);
+plot([P(1) ; LP(1)], [P(2) ; LP(2)],'Color','black');
+xticks(power(1:length(lactate)));
+end
+
+function pLT = dmaxmod(power, lactate, start)
+index = 1;
+pLT = power(index);
+d = 0;
+Q1 = [power(start) ; lactate(start)];
+Q2 = [power(length(lactate)) ; lactate(end)];
+[poly, ~, mu] = polyfit(power(start:length(lactate)), lactate(start:end), 3);
+for i = power(start):power(length(lactate))
+    dLP = distLP(Q1, Q2, [i ; polyval(poly, i, [], mu)]);
+    if dLP > d
+        d = dLP;
+        pLT = i;
+    end
+end
+%plotting
+ax = subplot(4,1,4);
+title('Dmod');
+hold on;
+plot([power(start) power(length(lactate))], [lactate(start) ; lactate(end)]);
+plot(power(1:length(lactate)), lactate, 'o');
+plot(power(start):power(length(lactate)), polyval(poly, power(start):power(length(lactate)), [], mu), 'REPLACE_WITH_DASH_DASH');
+P = [pLT ; polyval(poly, pLT, [], mu)];
+xl = [power(1)-10 power(length(lactate))+10];
+yl = [min(lactate)-1 max(lactate)*1.1];
+xlim(xl);  ylim(yl);
+r = get(ax, 'DataAspectRatio');
+u = Q2 - Q1; n = [u(2) / r(2) ; -u(1) / r(1)];
+LP = P - distLP(Q1, Q2, P)*n/norm(n);
+plot([P(1) ; LP(1)], [P(2) ; LP(2)],'Color','black');
+xticks(power(1:length(lactate)));
+end
+
+function d = distLP(Q1, Q2, P)
+d = abs(det([Q2-Q1,P-Q1]))/norm(Q2-Q1);
+end
+
+function pLT = twoLTlin(power, lactate)
+x0 = [lactate(1) ; 0 ; 0 ; 0 ; power(2) ; power(3)];
+lb = [lactate(1)-1 ; -1 ; -1 ; -1 ; power(2) ; power(3)];
+ub = [2*lactate(1) ; 1 ; 5 ; 10 ; power(length(lactate)-2) ; power(length(lactate)-1)];
+A = zeros(length(lb));
+A(1,5) = 1;
+A(1,6) = -1;
+b = zeros(size(lb));
+b(1) = power(1)-power(2);
+fun = @(x) mean((funcValues(@linLa, power(1:length(lactate)), x) - lactate).^2);
+options = optimset('Display', 'off') ;
+x = fmincon(fun, x0, A, b, [], [], lb, ub, [], options);
+pLT = x(6);
+%plotting
+ax = subplot(4,1,1);
+title('SegmentalLinear');
+hold on;
+p = power(1:length(lactate));
+p = [p(p<x(5)) ; x(5) ; p(p>x(5)&p<x(6)) ; x(6) ; p(p>x(6))];
+plot(p, funcValues(@linLa, p, x));
+plot(power(1:length(lactate)), lactate, 'o');
+xl = [power(1)-10 power(length(lactate))+10];
+yl = [min(lactate)-1 max(lactate)*1.1];
+xlim(xl);  ylim(yl);
+plot([x(5) x(5)], get(ax,'YLim'),'Color','black');
+plot([x(6) x(6)], get(ax,'YLim'),'Color','black');
+xticks(power(1:length(lactate)));
+end
+
+function pLT = twoLTpara(power, lactate)
+x0 = [lactate(1) ; 1 ; 1 ; power(2) ; power(3)];
+lb = [lactate(1)-1 ; 10^-4 ; 10^-4 ; power(2) ; power(3)];
+ub = [2*lactate(1) ; 0.01 ; 0.01 ; power(length(lactate)-2) ; power(length(lactate)-1)];
+A = zeros(length(lb));
+A(1,4) = 1;
+A(1,5) = -1;
+b = zeros(size(lb));
+b(1) = power(1)-power(2);
+fun = @(x) mean((funcValues(@paraLa, power(1:length(lactate)), x) - lactate).^2);
+options = optimset('Display', 'off') ;
+x = fmincon(fun, x0, A, b, [], [], lb, ub, [], options);
+pLT = x(5);
+%plotting
+ax = subplot(4,1,2);
+title('SegmentalParabolic');
+hold on;
+plot(power(1:length(lactate)), funcValues(@paraLa, power(1:length(lactate)), x));
+plot(power(1:length(lactate)), lactate, 'o');
+xl = [power(1)-10 power(length(lactate))+10];
+yl = [min(lactate)-1 max(lactate)*1.1];
+xlim(xl);  ylim(yl);
+plot([x(4) x(4)], get(ax,'YLim'),'Color','black');
+plot([x(5) x(5)], get(ax,'YLim'),'Color','black');
+xticks(power(1:length(lactate)));
+end
+
+function values = funcValues(fun, power, x)
+values = zeros(size(power));
+for i = 1:length(power)
+    values(i) = fun(power(i), x);
+end
+end
+
+function la = linLa(power, x)
+p = x(1); a1 = x(2); a2 = x(3); a3 = x(4) ; d1 = x(5); d2 = x(6); %#ok<NASGU>
+if power <= d1
+    la = p + a1*power;
+elseif power <= d2
+    la = p + a1*d1 + a2*(power-d1);
+else
+    la = p + a1*d1 + a2*(d2-d1) + a3*(power-d2);
+end
+end
+
+function la = paraLa(power, x)
+p = x(1); a1 = x(2); a2 = x(3); d1 = x(4); d2 = x(5); %#ok<NASGU>
+if power <= d1
+    la = p;
+elseif power <= d2
+    la = p + a1*(power-d1)^2;
+else
+    la = p + a1*(power-d1)^2 + 2*a1*(d2-d1)*(power-d2) + a2*(power-d2)^2;
+end
+end
+##### SOURCE END #####
+--></body></html>
