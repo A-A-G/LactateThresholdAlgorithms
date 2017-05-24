@@ -23,7 +23,7 @@
 
 ![Example](https://raw.githubusercontent.com/A-A-G/LactateThresholdAlgorithms/master/lactate/LactateThreshold2_01.png)
 
-### Requiered:
+### Required:
 * MATLAB > 2016b (functions in script)
 * Optimization Toolbox (fmincon)
 * Bioinformatics Toolbox (suptitle, not necessary)
