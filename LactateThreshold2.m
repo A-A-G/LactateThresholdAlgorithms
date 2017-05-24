@@ -16,14 +16,13 @@ PB06 = data(6,:)'; PB06 = PB06(~isnan(PB06));
 PB08 = data(8,:)'; PB08 = PB08(~isnan(PB08));
 PB09 = data(9,:)'; PB09 = PB09(~isnan(PB09));
 subj_data = {PB03 , PB05 , PB06 , PB08 , PB09}';
-Used_LT = [380 ; 240 ; 260 ; 200 ; 220];
 
 %% estimate thresholds
 LT1 = zeros(size(subj_data));
-Mader = zeros(size(subj_data));
+Heck = zeros(size(subj_data));
 SegLin = zeros(size(subj_data));
 SegPara = zeros(size(subj_data));
-Guidetti = zeros(size(subj_data));
+Baldari = zeros(size(subj_data));
 Dickhuth = zeros(size(subj_data));
 Dmax = zeros(size(subj_data));
 Dmod = zeros(size(subj_data));
@@ -31,8 +30,8 @@ for i = 1:length(subj_data)
     f = figure('Name',subs{i});
     set(f, 'Units', 'normalized', 'Position', [0.1, 0.1, 0.4, 0.8]);
     LT1(i) = lacT1(steps, subj_data{i});
-    Mader(i) = maderLT(steps, subj_data{i});
-    Guidetti(i) = iat(steps, subj_data{i});
+    Heck(i) = maderLT(steps, subj_data{i});
+    Baldari(i) = iat(steps, subj_data{i});
     Dickhuth(i) = dick(steps, subj_data{i});
     SegLin(i) = twoLTlin(steps, subj_data{i});
     SegPara(i) = twoLTpara(steps, subj_data{i});
@@ -42,29 +41,21 @@ for i = 1:length(subj_data)
 end
 
 %% results
-Used_LT = [Used_LT ; round(mean(Used_LT))];
-Mader = [round(Mader) ; round(mean(Mader))];
-Guidetti = [round(Guidetti); round(mean(Guidetti ))];
+Heck = [round(Heck) ; round(mean(Heck))];
+Baldari = [round(Baldari); round(mean(Baldari ))];
 Dickhuth = [round(Dickhuth); round(mean(Dickhuth))];
 SegLin = [round(SegLin); round(mean(SegLin))];
 SegPara = [round(SegPara); round(mean(SegPara))];
 Dmax = [round(Dmax); round(mean(Dmax))];
 Dmod = [round(Dmod); round(mean(Dmod))];
-mean = mean([Mader,Guidetti,Dickhuth,SegLin,SegPara,Dmax,Dmod],2);
-std = std([Mader,Guidetti,Dickhuth,SegLin,SegPara,Dmax,Dmod],0,2);
+mean = mean([Heck,Baldari,Dickhuth,SegLin,SegPara,Dmax,Dmod],2);
+std = std([Heck,Baldari,Dickhuth,SegLin,SegPara,Dmax,Dmod],0,2);
 mean_minus_std = round(mean - std);
 mean_plus_std = round(mean + std);
 mean = round(mean);
 std = round(std);
-fits = cell(size(subj_data));
-for i = 1:length(subj_data)+1
-   if  (mean_minus_std(i) <= Used_LT(i)) && (mean_plus_std(i) >= Used_LT(i))
-       fits{i} = 'x';
-   else
-       fits{i} = '';
-   end       
-end
-T = table(Used_LT,Mader,Guidetti,Dickhuth,SegLin,SegPara,Dmax,Dmod,mean,std,mean_minus_std,mean_plus_std,fits,'RowNames',subs);
+%T = table(Heck,Baldari,Dickhuth,SegLin,SegPara,Dmax,Dmod,mean,std,mean_minus_std,mean_plus_std,'RowNames',subs);
+T = table(Heck,Baldari,Dickhuth,SegLin,SegPara,Dmax,Dmod,mean,std,'RowNames',subs);
 disp(T);
 
 %% algorithms

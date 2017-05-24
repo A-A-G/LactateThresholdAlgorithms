@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>LactateThreshold2</title><meta name="generator" content="MATLAB 9.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-03-15"><meta name="DC.source" content="LactateThreshold2.m"><style type="text/css">
+      --><title>LactateThreshold2</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-05-24"><meta name="DC.source" content="LactateThreshold2.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -70,7 +70,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 close <span class="string">all</span>;
 </pre><h2 id="2">files</h2><pre class="codeinput">datafile = <span class="string">'Stufentest_laktat_leistung.csv'</span>;
 </pre><h2 id="3">import</h2><pre class="codeinput">data = importLactate(datafile);
-</pre><h2 id="4">data</h2><pre class="codeinput">subs = {<span class="string">'PB03'</span> ; <span class="string">'PB05'</span> ; <span class="string">'PB06'</span> ; <span class="string">'PB08'</span> ; <span class="string">'PB09'</span>};
+</pre><h2 id="4">data</h2><pre class="codeinput">subs = {<span class="string">'PB03'</span> ; <span class="string">'PB05'</span> ; <span class="string">'PB06'</span> ; <span class="string">'PB08'</span> ; <span class="string">'PB09'</span> ; <span class="string">'Average'</span>};
 steps = data(1,:)';
 PB03 = data(3,:)'; PB03 = PB03(~isnan(PB03));
 PB05 = data(5,:)'; PB05 = PB05(~isnan(PB05));
@@ -78,12 +78,11 @@ PB06 = data(6,:)'; PB06 = PB06(~isnan(PB06));
 PB08 = data(8,:)'; PB08 = PB08(~isnan(PB08));
 PB09 = data(9,:)'; PB09 = PB09(~isnan(PB09));
 subj_data = {PB03 , PB05 , PB06 , PB08 , PB09}';
-Used_LT = [380 ; 240 ; 260 ; 200 ; 220];
 </pre><h2 id="5">estimate thresholds</h2><pre class="codeinput">LT1 = zeros(size(subj_data));
-Mader = zeros(size(subj_data));
+Heck = zeros(size(subj_data));
 SegLin = zeros(size(subj_data));
 SegPara = zeros(size(subj_data));
-Guidetti = zeros(size(subj_data));
+Baldari = zeros(size(subj_data));
 Dickhuth = zeros(size(subj_data));
 Dmax = zeros(size(subj_data));
 Dmod = zeros(size(subj_data));
@@ -91,8 +90,8 @@ Dmod = zeros(size(subj_data));
     f = figure(<span class="string">'Name'</span>,subs{i});
     set(f, <span class="string">'Units'</span>, <span class="string">'normalized'</span>, <span class="string">'Position'</span>, [0.1, 0.1, 0.4, 0.8]);
     LT1(i) = lacT1(steps, subj_data{i});
-    Mader(i) = maderLT(steps, subj_data{i});
-    Guidetti(i) = iat(steps, subj_data{i});
+    Heck(i) = maderLT(steps, subj_data{i});
+    Baldari(i) = iat(steps, subj_data{i});
     Dickhuth(i) = dick(steps, subj_data{i});
     SegLin(i) = twoLTlin(steps, subj_data{i});
     SegPara(i) = twoLTpara(steps, subj_data{i});
@@ -100,37 +99,31 @@ Dmod = zeros(size(subj_data));
     Dmod(i) = dmod(steps, subj_data{i});
     suptitle(subs{i});
 <span class="keyword">end</span>
-</pre><img vspace="5" hspace="5" src="LactateThreshold2_01.png" alt=""> <img vspace="5" hspace="5" src="LactateThreshold2_02.png" alt=""> <img vspace="5" hspace="5" src="LactateThreshold2_03.png" alt=""> <img vspace="5" hspace="5" src="LactateThreshold2_04.png" alt=""> <img vspace="5" hspace="5" src="LactateThreshold2_05.png" alt=""> <h2 id="6">results</h2><pre class="codeinput">mean = mean([Mader,Guidetti,Dickhuth,SegLin,SegPara,Dmax,Dmod],2);
-std = std([Mader,Guidetti,Dickhuth,SegLin,SegPara,Dmax,Dmod],0,2);
-Mader = round(Mader);
-Guidetti = round(Guidetti);
-Dickhuth = round(Dickhuth);
-SegLin = round(SegLin);
-SegPara = round(SegPara);
-Dmax = round(Dmax);
-Dmod = round(Dmod);
+</pre><img vspace="5" hspace="5" src="LactateThreshold2_01.png" alt=""> <img vspace="5" hspace="5" src="LactateThreshold2_02.png" alt=""> <img vspace="5" hspace="5" src="LactateThreshold2_03.png" alt=""> <img vspace="5" hspace="5" src="LactateThreshold2_04.png" alt=""> <img vspace="5" hspace="5" src="LactateThreshold2_05.png" alt=""> <h2 id="6">results</h2><pre class="codeinput">Heck = [round(Heck) ; round(mean(Heck))];
+Baldari = [round(Baldari); round(mean(Baldari ))];
+Dickhuth = [round(Dickhuth); round(mean(Dickhuth))];
+SegLin = [round(SegLin); round(mean(SegLin))];
+SegPara = [round(SegPara); round(mean(SegPara))];
+Dmax = [round(Dmax); round(mean(Dmax))];
+Dmod = [round(Dmod); round(mean(Dmod))];
+mean = mean([Heck,Baldari,Dickhuth,SegLin,SegPara,Dmax,Dmod],2);
+std = std([Heck,Baldari,Dickhuth,SegLin,SegPara,Dmax,Dmod],0,2);
 mean_minus_std = round(mean - std);
 mean_plus_std = round(mean + std);
 mean = round(mean);
 std = round(std);
-fits = cell(size(subj_data));
-<span class="keyword">for</span> i = 1:length(subj_data)
-   <span class="keyword">if</span>  (mean_minus_std(i) &lt;= Used_LT(i)) &amp;&amp; (mean_plus_std(i) &gt;= Used_LT(i))
-       fits{i} = <span class="string">'x'</span>;
-   <span class="keyword">else</span>
-       fits{i} = <span class="string">''</span>;
-   <span class="keyword">end</span>
-<span class="keyword">end</span>
-T = table(Used_LT,Mader,Guidetti,Dickhuth,SegLin,SegPara,Dmax,Dmod,mean,std,mean_minus_std,mean_plus_std,fits,<span class="string">'RowNames'</span>,subs);
+<span class="comment">%T = table(Heck,Baldari,Dickhuth,SegLin,SegPara,Dmax,Dmod,mean,std,mean_minus_std,mean_plus_std,'RowNames',subs);</span>
+T = table(Heck,Baldari,Dickhuth,SegLin,SegPara,Dmax,Dmod,mean,std,<span class="string">'RowNames'</span>,subs);
 disp(T);
-</pre><pre class="codeoutput">            Used_LT    Mader    Guidetti    Dickhuth    SegLin    SegPara    Dmax    Dmod    mean    std    mean_minus_std    mean_plus_std    fits
-            _______    _____    ________    ________    ______    _______    ____    ____    ____    ___    ______________    _____________    ____
+</pre><pre class="codeoutput">               Heck    Baldari    Dickhuth    SegLin    SegPara    Dmax    Dmod    mean    std
+               ____    _______    ________    ______    _______    ____    ____    ____    ___
 
-    PB03    380        388      360         380         357       368        311     382     364     26     338               390              'x' 
-    PB05    240        283      260         272         253       236        225     276     258     21     236               279              'x' 
-    PB06    260        267      220         251         258       259        225     262     249     19     230               268              'x' 
-    PB08    200        215      180         203         219       214        194     224     207     16     191               222              'x' 
-    PB09    220        220      200         212         218       223        195     226     213     12     202               225              'x' 
+    PB03       388     360        380         357       368        311     382     364     26 
+    PB05       283     260        272         253       236        225     276     258     21 
+    PB06       267     220        251         258       259        225     262     249     19 
+    PB08       215     180        203         219       214        194     224     207     16 
+    PB09       220     200        212         218       223        195     226     213     12 
+    Average    275     244        263         261       260        230     274     258     16 
 
 </pre><h2 id="7">algorithms</h2><pre class="codeinput"><span class="keyword">function</span> pLT = maderLT(power, lactate)
 pLT = NaN;
@@ -327,7 +320,7 @@ p = x(1); a1 = x(2); a2 = x(3); d1 = x(4); d2 = x(5); <span class="comment">%#ok
     la = p + a1*(power-d1)^2 + 2*a1*(d2-d1)*(power-d2) + a2*(power-d2)^2;
 <span class="keyword">end</span>
 <span class="keyword">end</span>
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2016b</a><br></p></div><!--
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 clearvars;
 close all;
@@ -339,7 +332,7 @@ datafile = 'Stufentest_laktat_leistung.csv';
 data = importLactate(datafile);
 
 %% data
-subs = {'PB03' ; 'PB05' ; 'PB06' ; 'PB08' ; 'PB09'};
+subs = {'PB03' ; 'PB05' ; 'PB06' ; 'PB08' ; 'PB09' ; 'Average'};
 steps = data(1,:)';
 PB03 = data(3,:)'; PB03 = PB03(~isnan(PB03));
 PB05 = data(5,:)'; PB05 = PB05(~isnan(PB05));
@@ -347,14 +340,13 @@ PB06 = data(6,:)'; PB06 = PB06(~isnan(PB06));
 PB08 = data(8,:)'; PB08 = PB08(~isnan(PB08));
 PB09 = data(9,:)'; PB09 = PB09(~isnan(PB09));
 subj_data = {PB03 , PB05 , PB06 , PB08 , PB09}';
-Used_LT = [380 ; 240 ; 260 ; 200 ; 220];
 
 %% estimate thresholds
 LT1 = zeros(size(subj_data));
-Mader = zeros(size(subj_data));
+Heck = zeros(size(subj_data));
 SegLin = zeros(size(subj_data));
 SegPara = zeros(size(subj_data));
-Guidetti = zeros(size(subj_data));
+Baldari = zeros(size(subj_data));
 Dickhuth = zeros(size(subj_data));
 Dmax = zeros(size(subj_data));
 Dmod = zeros(size(subj_data));
@@ -362,8 +354,8 @@ for i = 1:length(subj_data)
     f = figure('Name',subs{i});
     set(f, 'Units', 'normalized', 'Position', [0.1, 0.1, 0.4, 0.8]);
     LT1(i) = lacT1(steps, subj_data{i});
-    Mader(i) = maderLT(steps, subj_data{i});
-    Guidetti(i) = iat(steps, subj_data{i});
+    Heck(i) = maderLT(steps, subj_data{i});
+    Baldari(i) = iat(steps, subj_data{i});
     Dickhuth(i) = dick(steps, subj_data{i});
     SegLin(i) = twoLTlin(steps, subj_data{i});
     SegPara(i) = twoLTpara(steps, subj_data{i});
@@ -373,28 +365,21 @@ for i = 1:length(subj_data)
 end
 
 %% results
-mean = mean([Mader,Guidetti,Dickhuth,SegLin,SegPara,Dmax,Dmod],2);
-std = std([Mader,Guidetti,Dickhuth,SegLin,SegPara,Dmax,Dmod],0,2);
-Mader = round(Mader);
-Guidetti = round(Guidetti);
-Dickhuth = round(Dickhuth);
-SegLin = round(SegLin);
-SegPara = round(SegPara);
-Dmax = round(Dmax);
-Dmod = round(Dmod);
+Heck = [round(Heck) ; round(mean(Heck))];
+Baldari = [round(Baldari); round(mean(Baldari ))];
+Dickhuth = [round(Dickhuth); round(mean(Dickhuth))];
+SegLin = [round(SegLin); round(mean(SegLin))];
+SegPara = [round(SegPara); round(mean(SegPara))];
+Dmax = [round(Dmax); round(mean(Dmax))];
+Dmod = [round(Dmod); round(mean(Dmod))];
+mean = mean([Heck,Baldari,Dickhuth,SegLin,SegPara,Dmax,Dmod],2);
+std = std([Heck,Baldari,Dickhuth,SegLin,SegPara,Dmax,Dmod],0,2);
 mean_minus_std = round(mean - std);
 mean_plus_std = round(mean + std);
 mean = round(mean);
 std = round(std);
-fits = cell(size(subj_data));
-for i = 1:length(subj_data)
-   if  (mean_minus_std(i) <= Used_LT(i)) && (mean_plus_std(i) >= Used_LT(i))
-       fits{i} = 'x';
-   else
-       fits{i} = '';
-   end       
-end
-T = table(Used_LT,Mader,Guidetti,Dickhuth,SegLin,SegPara,Dmax,Dmod,mean,std,mean_minus_std,mean_plus_std,fits,'RowNames',subs);
+%T = table(Heck,Baldari,Dickhuth,SegLin,SegPara,Dmax,Dmod,mean,std,mean_minus_std,mean_plus_std,'RowNames',subs);
+T = table(Heck,Baldari,Dickhuth,SegLin,SegPara,Dmax,Dmod,mean,std,'RowNames',subs);
 disp(T);
 
 %% algorithms
